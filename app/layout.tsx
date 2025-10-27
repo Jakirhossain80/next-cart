@@ -2,6 +2,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 /**
  * Fonts
@@ -97,7 +99,7 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
-  manifest: "/site.webmanifest",
+  
   verification: {
     google: "",
     yandex: "",
@@ -139,7 +141,12 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <div id="main-content">{children}</div>
+        <div id="main-content"> 
+          <Header/>
+          {children}
+          <Footer/>
+          
+          </div>
       </body>
     </html>
   );
