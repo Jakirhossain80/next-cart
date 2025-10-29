@@ -6,7 +6,7 @@ interface Props {
   onTabSelect: (tab: string) => void;
 }
 
-const HomeTabbar = ({ selectedTab, onTabSelect }: Props) => {
+const HomeTabBar = ({ selectedTab, onTabSelect }: Props) => {
   return (
     <div className="flex items-center flex-wrap gap-5 justify-between">
       <div className="flex items-center gap-1.5 text-sm font-semibold">
@@ -32,4 +32,4 @@ const HomeTabbar = ({ selectedTab, onTabSelect }: Props) => {
   );
 };
 
-export default HomeTabbar;
+export default HomeTabBar;

@@ -7,7 +7,7 @@ import { client } from "@/sanity/lib/client";
 import NoProductAvailable from "./NoProductAvailable";
 import { Loader2 } from "lucide-react";
 import Container from "./Container";
-import HomeTabbar from "./HomeTabbar";
+import HomeTabBar from "./HomeTabBar";
 import { productType } from "@/constants/data";
 import { Product } from "@/sanity.types";
 
@@ -37,7 +37,7 @@ const ProductGrid = () => {
 
   return (
     <Container className="flex flex-col lg:px-0 my-10">
-      <HomeTabbar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+      <HomeTabBar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
       {loading ? (
         <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full mt-10">
           <motion.div className="flex items-center space-x-2 text-blue-600">
