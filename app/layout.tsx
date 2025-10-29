@@ -134,9 +134,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </a>
 
         <Providers>
-          <Header />
-          <div id="main-content">{children}</div>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+          <main className="flex-1">{children}</main>
           <Footer />
+          </div>
         </Providers>
       </body>
     </html>
