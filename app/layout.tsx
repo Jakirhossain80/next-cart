@@ -4,19 +4,15 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Providers from "./providers";
 
-/**
- * Fonts
- * Use `"variable"` instead of an invalid range like "100 900".
- * (Alternatively, use an array: ["100","200","300","400","500","600","700","800","900"])
- */
+/** Fonts (use variable to avoid invalid ranges) */
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   weight: "variable",
   display: "swap",
 });
-
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
@@ -30,7 +26,7 @@ const APP_NAME = "NextCart";
 const APP_DESC =
   "NextCart is a modern, SEO-friendly e-commerce app built with Next.js, Tailwind CSS, and TypeScript.";
 
-/** Viewport (App Router) */
+/** Viewport */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -44,10 +40,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   applicationName: APP_NAME,
-  title: {
-    default: `${APP_NAME} — E-Commerce App`,
-    template: `%s | ${APP_NAME}`,
-  },
+  title: { default: `${APP_NAME} — E-Commerce App`, template: `%s | ${APP_NAME}` },
   description: APP_DESC,
   keywords: [
     "NextCart",
@@ -95,11 +88,11 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
+      // If you have public/icon.png, keep the next line; otherwise remove it to avoid 404s.
       { url: "/icon.png", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
-  
   verification: {
     google: "",
     yandex: "",
@@ -107,9 +100,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full">
       <head>
@@ -141,12 +132,12 @@ export default function RootLayout({
         >
           Skip to content
         </a>
-        <div id="main-content"> 
-          <Header/>
-          {children}
-          <Footer/>
-          
-          </div>
+
+        <Providers>
+          <Header />
+          <div id="main-content">{children}</div>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
