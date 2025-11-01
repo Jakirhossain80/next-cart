@@ -1,7 +1,6 @@
-// app/layout.tsx
+import "../globals.css";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Providers from "../providers";
@@ -20,7 +19,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-/** App constants */
+/** App constants (kept as constants for deterministic SSR output) */
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const APP_NAME = "NextCart";
 const APP_DESC =
@@ -88,7 +87,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      // If you have public/icon.png, keep the next line; otherwise remove it to avoid 404s.
+      // If you don't have /public/icon.png, remove the next line to avoid a 404.
       { url: "/icon.png", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
@@ -100,27 +99,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+// Deterministic JSON-LD object to avoid hydration diffs
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: APP_NAME,
+  url: APP_URL,
+  description: APP_DESC,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${APP_URL}/search?q={query}`,
+    "query-input": "required name=query",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full">
       <head>
-        {/* JSON-LD (Website) */}
+        {/* JSON-LD rendered on the server for hydration stability */}
         <script
+          id="ld-json-website"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: APP_NAME,
-              url: APP_URL,
-              description: APP_DESC,
-              potentialAction: {
-                "@type": "SearchAction",
-                target: `${APP_URL}/search?q={query}`,
-                "query-input": "required name=query",
-              },
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body
@@ -136,8 +139,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Providers>
           <div className="flex flex-col min-h-screen">
             <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
           </div>
         </Providers>
       </body>
