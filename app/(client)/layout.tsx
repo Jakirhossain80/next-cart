@@ -1,10 +1,10 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import Providers from "./providers";
+import Providers from "../providers";
 
 /** Fonts (use variable to avoid invalid ranges) */
 const geistSans = Geist({
