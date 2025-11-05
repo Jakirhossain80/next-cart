@@ -93,20 +93,6 @@ NEXT-CART
 ├── tsconfig.json
 └── .env # Environment variables
 
----
-
-## 🧾 Environment Variables (`.env`)
-
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-
-NEXT_PUBLIC_SANITY_PROJECT_ID=n0bva0w8
-NEXT_PUBLIC_SANITY_DATASET=production
-SANITY_API_READ_TOKEN=skxxxxxx
-
-STRIPE_SECRET_KEY=sk_test_xxx
-STRIPE_WEBHOOK_SECRET=whsec_xxx
-
 
 ---
 
