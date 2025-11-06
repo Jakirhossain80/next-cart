@@ -1,11 +1,20 @@
-import createImageUrlBuilder from '@sanity/image-url'
-import { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
-import { dataset, projectId } from '../env'
+// Prefer the shared client if present (stable across app)
+import { client } from "./client";
 
-// https://www.sanity.io/docs/image-url
-const builder = createImageUrlBuilder({ projectId, dataset })
+// Fallback to explicit env values (preserves your original behavior)
+import { dataset, projectId } from "../env";
 
-export const urlFor = (source: SanityImageSource) => {
-  return builder.image(source)
+// Build from client when possible; otherwise from projectId/dataset
+const builder =
+  // `client` comes from sanity/lib/client and is safe to use on server/browser
+  client
+    ? imageUrlBuilder(client)
+    : imageUrlBuilder({ projectId, dataset });
+
+
+export function urlFor(source: SanityImageSource) {
+  return builder.image(source).auto("format").fit("max");
 }
