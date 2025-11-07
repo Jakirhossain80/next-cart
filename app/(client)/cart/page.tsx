@@ -23,7 +23,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Address } from "@/sanity.types";
-import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import useStore from "@/store";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -51,10 +50,18 @@ const CartPage = () => {
   const fetchAddresses = async () => {
     setLoading(true);
     try {
-      const query = `*[_type=="address"] | order(publishedAt desc)`;
-      const data = await client.fetch(query);
+      // ✅ Fetch via Next API (server), not directly from Sanity in the browser
+      const url = new URL("/api/addresses", window.location.origin);
+      const res = await fetch(url.toString(), { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+
+      // Support either { ok, data } or raw array responses
+      const data: Address[] = Array.isArray(json) ? json : json?.data ?? [];
+
       setAddresses(data);
-      const defaultAddress = data.find((addr: Address) => addr.default);
+
+      const defaultAddress = data.find((addr: Address) => (addr as any)?.default);
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
       } else if (data.length > 0) {
@@ -66,9 +73,12 @@ const CartPage = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   const handleResetCart = () => {
     const confirmed = window.confirm(
       "Are you sure you want to reset your cart?"
@@ -99,6 +109,7 @@ const CartPage = () => {
       setLoading(false);
     }
   };
+
   return (
     <div className="bg-gray-50 pb-52 md:pb-10">
       {isSignedIn ? (
@@ -250,7 +261,7 @@ const CartPage = () => {
                           <CardContent>
                             <RadioGroup
                               defaultValue={addresses
-                                ?.find((addr) => addr.default)
+                                ?.find((addr) => (addr as any)?.default)
                                 ?._id.toString()}
                             >
                               {addresses?.map((address) => (

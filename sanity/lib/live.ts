@@ -1,10 +1,3 @@
-// sanity/lib/live.ts
-// NextCart — Live Content shim with dynamic import.
-// - No static import of `defineLive` (avoids compile-time export errors).
-// - Keeps existing API shape for sanityFetch -> { data: T }.
-// - Adds sanityFetchData -> T for convenience.
-// - Safe fallback to plain client.fetch when live isn't available.
-
 import { client } from "./client";
 
 const token = process.env.SANITY_API_READ_TOKEN;
