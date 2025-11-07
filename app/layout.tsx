@@ -13,7 +13,7 @@ const websiteJsonLd = {
   "@type": "WebSite",
   name: "Next Cart",
   // Update to your real site URL when deployed
-  url: "https://example.com",
+  url: "https://next-cart-psi.vercel.app",
 };
 
 export default function RootLayout({
