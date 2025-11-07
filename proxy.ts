@@ -1,12 +1,16 @@
 // proxy.ts (root)
 // NextCart — Clerk proxy with public-route allowlist
-// Uses Clerk's current API: auth.protect()
+// - Keeps your robust matchers
+// - Adds /shop as public to avoid accidental protection/redirect loops
+// - Uses auth.protect() (current Clerk API)
+// - Defensive try/catch to avoid noisy crashes during local dev
 
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Public routes (no auth required). Adjust as needed.
 const isPublicRoute = createRouteMatcher([
   "/",
+  "/shop(.*)",          // ← Shop is public
   "/deal(.*)",
   "/blog(.*)",
   "/brand(.*)",
@@ -24,10 +28,15 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware((auth, req) => {
-  // Allow all public routes through
-  if (isPublicRoute(req)) return;
-  // Protect everything else
-  return auth.protect();
+  try {
+    // Allow all public routes through
+    if (isPublicRoute(req)) return;
+    // Protect everything else
+    return auth.protect();
+  } catch {
+    // In dev, never break the entire request pipeline due to middleware issues
+    return;
+  }
 });
 
 // Keep your robust matchers (skip Next internals & static assets; always run for API/TRPC)
