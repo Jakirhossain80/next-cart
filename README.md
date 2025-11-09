@@ -1,5 +1,7 @@
 # 🛒 NextCart — Full-Stack E-Commerce Platform
 
+# 🌐 [Live link](https://next-cart-psi.vercel.app) 
+
 **NextCart** is a modern, full-stack **Next.js 16** e-commerce application powered by **Sanity CMS** for content management, **Stripe** for secure payments, and **Clerk** for authentication.  
 It provides a seamless shopping experience — from browsing dynamic, CMS-driven products to secure checkout and order tracking — all built with best practices in scalability, accessibility, and design consistency.
 
@@ -135,7 +137,7 @@ Sidebar categories and latest blogs shown on post pages.
 ⚙️ Installation & Setup
 
 1️⃣ Clone the repository
-git clone https://github.com/yourusername/next-cart.git
+git clone https://github.com/Jakirhossain80/next-cart.git
 cd next-cart
 
 2️⃣ Install dependencies
@@ -202,9 +204,10 @@ This project is licensed under the MIT License — free to use, modify, and dist
 👨‍💻 Author
 Md. Jakir Hossain
 MERN Stack Web Developer
-🌐 Portfolio
- | 💼 LinkedIn
- | 🐙 GitHub
+🌐 [Portfolio](https://jakirdev-portfolio-bd.netlify.app) |
+💼 [LinkedIn](https://www.linkedin.com/in/jakir-hossain-dev) |
+🐙 [GitHub](https://github.com/Jakirhossain80)
+
 
 
 ⭐ If you find this project useful, please give it a star on GitHub!
