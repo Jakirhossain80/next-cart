@@ -1,4 +1,3 @@
-
 // Source: schema.json
 export type Address = {
   _id: string;
