@@ -12,7 +12,7 @@ const projectId =
 const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET ?? envDataset;
 const apiVersion =
-  process.env.SANITY_API_VERSION ?? envApiVersion ?? "2025-01-01";
+  process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? envApiVersion ?? "2025-10-29";
 
 // Helpful guard in case required vars are missing in production
 if (!projectId || !dataset) {

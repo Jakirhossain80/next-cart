@@ -13,7 +13,7 @@ const projectId =
 const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET ?? envDataset;
 const apiVersion =
-  process.env.SANITY_API_VERSION ?? envApiVersion ?? "2025-01-01";
+  process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? envApiVersion ?? "2025-10-29";
 
 // Prefer a dedicated read token name, but fall back to your existing variable for compatibility
 const token =
