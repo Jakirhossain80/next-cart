@@ -5,7 +5,6 @@ import { Address } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import { CartItem } from "@/store";
 import Stripe from "stripe";
-import { headers } from "next/headers";
 
 export interface Metadata {
   orderNumber: string;
@@ -20,7 +19,17 @@ export interface GroupedCartItems {
   quantity: number;
 }
 
-
+/**
+ * Determine the base URL for redirects.
+ * Order of preference:
+ * 1) NEXT_PUBLIC_BASE_URL (your existing env)
+ * 2) NEXT_PUBLIC_APP_URL (alternative public base URL)
+ * 3) http://localhost:3000 (dev fallback)
+ *
+ * NOTE: We intentionally do NOT call next/headers() here to avoid
+ * any "reading 'get'" errors in environments where a request
+ * context is not available.
+ */
 function getBaseUrl(): string {
   const fromBaseEnv = process.env.NEXT_PUBLIC_BASE_URL;
   if (fromBaseEnv) {
@@ -30,17 +39,6 @@ function getBaseUrl(): string {
   const fromAppEnv = process.env.NEXT_PUBLIC_APP_URL;
   if (fromAppEnv) {
     return fromAppEnv.replace(/\/$/, "");
-  }
-
-  try {
-    const hdrs = headers();
-    const origin = hdrs.get("origin") ?? hdrs.get("referer");
-    if (origin) {
-      return origin.replace(/\/$/, "");
-    }
-  } catch (err) {
-    // headers() can throw if not in a request context; just log and continue
-    console.warn("getBaseUrl: unable to read headers()", err);
   }
 
   // Safe default for local development
