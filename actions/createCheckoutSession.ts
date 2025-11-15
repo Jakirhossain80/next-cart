@@ -5,6 +5,7 @@ import { Address } from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import { CartItem } from "@/store";
 import Stripe from "stripe";
+import { headers } from "next/headers";
 
 export interface Metadata {
   orderNumber: string;
@@ -19,24 +20,58 @@ export interface GroupedCartItems {
   quantity: number;
 }
 
+
+function getBaseUrl(): string {
+  const fromBaseEnv = process.env.NEXT_PUBLIC_BASE_URL;
+  if (fromBaseEnv) {
+    return fromBaseEnv.replace(/\/$/, "");
+  }
+
+  const fromAppEnv = process.env.NEXT_PUBLIC_APP_URL;
+  if (fromAppEnv) {
+    return fromAppEnv.replace(/\/$/, "");
+  }
+
+  try {
+    const hdrs = headers();
+    const origin = hdrs.get("origin") ?? hdrs.get("referer");
+    if (origin) {
+      return origin.replace(/\/$/, "");
+    }
+  } catch (err) {
+    // headers() can throw if not in a request context; just log and continue
+    console.warn("getBaseUrl: unable to read headers()", err);
+  }
+
+  // Safe default for local development
+  return "http://localhost:3000";
+}
+
 export async function createCheckoutSession(
   items: GroupedCartItems[],
   metadata: Metadata
 ) {
   try {
-    // Retrieve existing customer or create a new one
+    const baseUrl = getBaseUrl();
+
+    // Retrieve existing customer or create a new one (based on email)
     const customers = await stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
     });
-    const customerId = customers?.data?.length > 0 ? customers.data[0].id : "";
+
+    const customerId =
+      customers?.data && customers.data.length > 0
+        ? customers.data[0].id
+        : "";
 
     const sessionPayload: Stripe.Checkout.SessionCreateParams = {
       metadata: {
         orderNumber: metadata.orderNumber,
         customerName: metadata.customerName,
         customerEmail: metadata.customerEmail,
-        clerkUserId: metadata.clerkUserId!,
+        // Fallback to empty string if clerkUserId is missing
+        clerkUserId: metadata.clerkUserId || "",
         address: JSON.stringify(metadata.address),
       },
       mode: "payment",
@@ -45,27 +80,29 @@ export async function createCheckoutSession(
       invoice_creation: {
         enabled: true,
       },
-      success_url: `${
-        process.env.NEXT_PUBLIC_BASE_URL
-      }/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cart`,
-      line_items: items?.map((item) => ({
-        price_data: {
-          currency: "USD",
-          unit_amount: Math.round(item?.product?.price! * 100),
-          product_data: {
-            name: item?.product?.name || "Unknown Product",
-            description: item?.product?.description,
-            metadata: { id: item?.product?._id },
-            images:
-              item?.product?.images && item?.product?.images?.length > 0
-                ? [urlFor(item?.product?.images[0]).url()]
-                : undefined,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${encodeURIComponent(
+        metadata.orderNumber
+      )}`,
+      cancel_url: `${baseUrl}/cart`,
+      line_items:
+        items?.map((item) => ({
+          price_data: {
+            currency: "USD",
+            unit_amount: Math.round(item?.product?.price! * 100),
+            product_data: {
+              name: item?.product?.name || "Unknown Product",
+              description: item?.product?.description,
+              metadata: { id: item?.product?._id },
+              images:
+                item?.product?.images && item?.product?.images.length > 0
+                  ? [urlFor(item?.product?.images[0]).url()]
+                  : undefined,
+            },
           },
-        },
-        quantity: item?.quantity,
-      })),
+          quantity: item?.quantity,
+        })) ?? [],
     };
+
     if (customerId) {
       sessionPayload.customer = customerId;
     } else {
@@ -73,6 +110,8 @@ export async function createCheckoutSession(
     }
 
     const session = await stripe.checkout.sessions.create(sessionPayload);
+
+    // Keep existing behavior: return the URL string
     return session.url;
   } catch (error) {
     console.error("Error creating Checkout Session", error);
