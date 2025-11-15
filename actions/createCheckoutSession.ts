@@ -19,17 +19,6 @@ export interface GroupedCartItems {
   quantity: number;
 }
 
-/**
- * Determine the base URL for redirects.
- * Order of preference:
- * 1) NEXT_PUBLIC_BASE_URL (your existing env)
- * 2) NEXT_PUBLIC_APP_URL (alternative public base URL)
- * 3) http://localhost:3000 (dev fallback)
- *
- * NOTE: We intentionally do NOT call next/headers() here to avoid
- * any "reading 'get'" errors in environments where a request
- * context is not available.
- */
 function getBaseUrl(): string {
   const fromBaseEnv = process.env.NEXT_PUBLIC_BASE_URL;
   if (fromBaseEnv) {
