@@ -1,20 +1,32 @@
+// proxy.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-// Public routes (no auth required). Adjust as needed.
+/**
+ * PUBLIC ROUTES
+ * These routes do NOT require authentication.
+ * Anything not in this list will require login.
+ */
 const isPublicRoute = createRouteMatcher([
-  "/",
-  "/shop(.*)",          // ← Shop is public
+  "/",                    // Home page MUST be public to avoid 401
+  "/shop(.*)",
   "/deal(.*)",
   "/blog(.*)",
   "/brand(.*)",
   "/category(.*)",
   "/product(.*)",
-  "/studio(.*)",        // Sanity Studio (make private if desired)
-  "/api/webhook(.*)",   // Stripe webhook must remain public
+
+  // Optional: Sanity Studio (make private later if needed)
+  "/studio(.*)",
+
+  // Stripe Webhook — must ALWAYS stay public
+  "/api/webhook(.*)",
+
+  // Clerk’s own auth pages
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/sso-callback(.*)",
-  // Common assets/icons
+
+  // Static assets
   "/favicon.ico",
   "/icon.png",
   "/apple-touch-icon.png",
@@ -22,20 +34,28 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware((auth, req) => {
   try {
-    // Allow all public routes through
+    // Allow all defined public routes
     if (isPublicRoute(req)) return;
-    // Protect everything else
+
+    // Everything else requires authentication
     return auth.protect();
-  } catch {
-    // In dev, never break the entire request pipeline due to middleware issues
+  } catch (err) {
+    console.error("Middleware error:", err);
+    // Fail gracefully — never break the request pipeline
     return;
   }
 });
 
-// Keep your robust matchers (skip Next internals & static assets; always run for API/TRPC)
+/**
+ * MATCHER CONFIG
+ * Ensures Clerk runs for all routes except Next internals & static files.
+ */
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Run middleware for all non-static routes
+    "/((?!_next|.*\\..*).*)",
+
+    // Always run for API routes including webhook
     "/(api|trpc)(.*)",
   ],
 };
