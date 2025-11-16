@@ -1,23 +1,18 @@
 import { Metadata } from "@/actions/createCheckoutSession";
 import stripe from "@/lib/stripe";
 import { backendClient } from "@/sanity/lib/backendClient";
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
-  // Read raw body first (required for Stripe signature verification)
+  // Read raw body first (Stripe needs the raw text for signature verification)
   const body = await req.text();
 
-  // Prefer the request headers; fall back to next/headers() if needed
-  const reqSignature = req.headers.get("stripe-signature");
-  const headerList = headers();
-  const headerSignature = headerList.get("stripe-signature");
-
-  const sig = reqSignature ?? headerSignature ?? null;
+  // Read the signature directly from the request headers
+  const sig = req.headers.get("stripe-signature");
 
   if (!sig) {
-    console.error("No Stripe signature header found on webhook request");
+    console.error("No stripe-signature header found on webhook request");
     return NextResponse.json(
       { error: "No stripe-signature header found" },
       { status: 400 }
@@ -28,9 +23,7 @@ export async function POST(req: NextRequest) {
   if (!webhookSecret) {
     console.error("Stripe webhook secret is not set");
     return NextResponse.json(
-      {
-        error: "Stripe webhook secret is not set",
-      },
+      { error: "Stripe webhook secret is not set" },
       { status: 500 }
     );
   }
@@ -41,9 +34,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Webhook signature verification failed:", error);
     return NextResponse.json(
-      {
-        error: `Webhook Error: ${error}`,
-      },
+      { error: `Webhook Error: ${error}` },
       { status: 400 }
     );
   }
@@ -59,9 +50,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       console.error("Error creating order in sanity:", error);
       return NextResponse.json(
-        {
-          error: `Error creating order: ${error}`,
-        },
+        { error: `Error creating order: ${error}` },
         { status: 400 }
       );
     }
@@ -168,7 +157,6 @@ async function updateStockLevels(
 ) {
   for (const { productId, quantity } of stockUpdates) {
     try {
-      // Fetch current stock
       const product = await backendClient.getDocument(productId);
 
       if (!product || typeof product.stock !== "number") {
@@ -180,7 +168,6 @@ async function updateStockLevels(
 
       const newStock = Math.max(product.stock - quantity, 0); // Ensure stock does not go negative
 
-      // Update stock in Sanity
       await backendClient.patch(productId).set({ stock: newStock }).commit();
     } catch (error) {
       console.error(`Failed to update stock for product ${productId}:`, error);
