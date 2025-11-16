@@ -6,26 +6,35 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
+  // Read raw body first (required for Stripe signature verification)
   const body = await req.text();
-  const headersList = await headers();
-  const sig = headersList.get("stripe-signature");
+
+  // Prefer the request headers; fall back to next/headers() if needed
+  const reqSignature = req.headers.get("stripe-signature");
+  const headerList = headers();
+  const headerSignature = headerList.get("stripe-signature");
+
+  const sig = reqSignature ?? headerSignature ?? null;
 
   if (!sig) {
+    console.error("No Stripe signature header found on webhook request");
     return NextResponse.json(
-      { error: "No Signature found for stripe" },
+      { error: "No stripe-signature header found" },
       { status: 400 }
     );
   }
+
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.log("Stripe webhook secret is not set");
+    console.error("Stripe webhook secret is not set");
     return NextResponse.json(
       {
         error: "Stripe webhook secret is not set",
       },
-      { status: 400 }
+      { status: 500 }
     );
   }
+
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
@@ -57,6 +66,7 @@ export async function POST(req: NextRequest) {
       );
     }
   }
+
   return NextResponse.json({ received: true });
 }
 
@@ -72,8 +82,10 @@ async function createOrderInSanity(
     payment_intent,
     total_details,
   } = session;
+
   const { orderNumber, customerName, customerEmail, clerkUserId, address } =
     metadata as unknown as Metadata & { address: string };
+
   const parsedAddress = address ? JSON.parse(address) : null;
 
   const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(
@@ -82,8 +94,14 @@ async function createOrderInSanity(
   );
 
   // Create Sanity product references and prepare stock updates
-  const sanityProducts = [];
-  const stockUpdates = [];
+  const sanityProducts: {
+    _key: string;
+    product: { _type: "reference"; _ref: string };
+    quantity: number;
+  }[] = [];
+
+  const stockUpdates: { productId: string; quantity: number }[] = [];
+
   for (const item of lineItemsWithProduct.data) {
     const productId = (item.price?.product as Stripe.Product)?.metadata?.id;
     const quantity = item?.quantity || 0;
@@ -98,10 +116,11 @@ async function createOrderInSanity(
       },
       quantity,
     });
+
     stockUpdates.push({ productId, quantity });
   }
-  //   Create order in Sanity
 
+  // Create order in Sanity
   const order = await backendClient.create({
     _type: "order",
     orderNumber,
@@ -115,7 +134,6 @@ async function createOrderInSanity(
     amountDiscount: total_details?.amount_discount
       ? total_details.amount_discount / 100
       : 0,
-
     products: sanityProducts,
     totalPrice: amount_total ? amount_total / 100 : 0,
     status: "paid",
@@ -139,8 +157,8 @@ async function createOrderInSanity(
   });
 
   // Update stock levels in Sanity
-
   await updateStockLevels(stockUpdates);
+
   return order;
 }
 
