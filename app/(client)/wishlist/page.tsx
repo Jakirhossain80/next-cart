@@ -1,19 +1,20 @@
-import NoAccess from "@/components/NoAccess";
+// app/(client)/wishlist/page.tsx (or your actual path)
+
 import WishListProducts from "@/components/WishListProducts";
-import { currentUser } from "@clerk/nextjs/server";
-import React from "react";
+import { auth } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 const WishListPage = async () => {
-  const user = await currentUser();
-  return (
-    <>
-      {user ? (
-        <WishListProducts />
-      ) : (
-        <NoAccess details="Log in to view your wishlist items. Don’t miss out on your cart products to make the payment!" />
-      )}
-    </>
-  );
+  const { userId } = auth();
+
+  // If the user is not signed in, redirect to your local /sign-in page
+  // with a redirect_url back to /wishlist after successful login.
+  if (!userId) {
+    redirect(`/sign-in?redirect_url=/wishlist`);
+  }
+
+  // If we reach here, the user is authenticated – render wishlist products.
+  return <WishListProducts />;
 };
 
 export default WishListPage;

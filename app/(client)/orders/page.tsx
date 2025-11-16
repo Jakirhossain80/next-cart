@@ -5,16 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getMyOrders } from "@/sanity/queries";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs";
 import { FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import React from "react";
 
 const OrdersPage = async () => {
-  const { userId } = await auth();
+  const { userId } = auth();
+
+  // If user is not logged in, redirect to local sign-in page
   if (!userId) {
-    return redirect("/");
+    redirect(`/sign-in?redirect_url=/orders`);
   }
 
   const orders = await getMyOrders(userId);
@@ -50,6 +52,7 @@ const OrdersPage = async () => {
                       <TableHead className="text-center">Action</TableHead>
                     </TableRow>
                   </TableHeader>
+
                   <OrdersComponent orders={orders} />
                 </Table>
                 <ScrollBar orientation="horizontal" />
