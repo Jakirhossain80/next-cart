@@ -5,6 +5,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Providers from "../providers";
 
+/**
+ * Because Header uses Clerk's server helpers (auth/currentUser),
+ * which internally rely on request headers, we must mark the
+ * app as dynamic so Next.js doesn't try to statically prerender
+ * routes like /blog, /cart, /orders, /wishlist, etc.
+ */
+export const dynamic = "force-dynamic";
+
 /** Fonts (use variable to avoid invalid ranges) */
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,7 +47,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   applicationName: APP_NAME,
-  title: { default: `${APP_NAME} — E-Commerce App`, template: `%s | ${APP_NAME}` },
+  title: {
+    default: `${APP_NAME} — E-Commerce App`,
+    template: `%s | ${APP_NAME}`,
+  },
   description: APP_DESC,
   keywords: [
     "NextCart",
@@ -62,7 +73,14 @@ export const metadata: Metadata = {
     siteName: APP_NAME,
     title: `${APP_NAME} — E-Commerce App`,
     description: APP_DESC,
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "NextCart — Shop smarter" }],
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "NextCart — Shop smarter",
+      },
+    ],
     locale: "en_US",
   },
   twitter: {
