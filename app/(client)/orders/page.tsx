@@ -12,14 +12,31 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 const OrdersPage = async () => {
-  const { userId } = await auth();
+  let userId: string | null = null;
 
-  // If user is not logged in, redirect to local sign-in page
+  // 1) Safely read Clerk auth
+  try {
+    const { userId: uid } = await auth();
+    userId = uid ?? null;
+  } catch (error) {
+    console.error("[OrdersPage] Error reading Clerk auth:", error);
+    userId = null;
+  }
+
+  // 2) If user is not logged in, redirect to local sign-in page
   if (!userId) {
     redirect(`/sign-in?redirect_url=/orders`);
   }
 
-  const orders = await getMyOrders(userId);
+  // 3) Safely fetch orders
+  let orders: Awaited<ReturnType<typeof getMyOrders>> = [];
+  try {
+    const data = await getMyOrders(userId);
+    orders = data ?? [];
+  } catch (error) {
+    console.error("[OrdersPage] Error fetching orders from Sanity:", error);
+    orders = [];
+  }
 
   return (
     <div>

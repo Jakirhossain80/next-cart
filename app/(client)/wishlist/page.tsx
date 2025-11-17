@@ -4,10 +4,17 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 const WishListPage = async () => {
-  const { userId } = await auth();
+  let userId: string | null = null;
 
-  // If the user is not signed in, redirect to your local /sign-in page
-  // with a redirect_url back to /wishlist after successful login.
+  try {
+    const { userId: uid } = await auth();
+    userId = uid ?? null;
+  } catch (error) {
+    console.error("[WishListPage] Error reading Clerk auth:", error);
+    userId = null;
+  }
+
+  // If the user is not signed in (or auth failed), redirect to /sign-in
   if (!userId) {
     redirect(`/sign-in?redirect_url=/wishlist`);
   }

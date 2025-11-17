@@ -14,12 +14,35 @@ import { Logs } from "lucide-react";
 import { getMyOrders } from "@/sanity/queries";
 
 const Header = async () => {
-  const user = await currentUser();
-  const { userId } = await auth();
-  let orders = null;
-  if (userId) {
-    orders = await getMyOrders(userId);
+  let user: Awaited<ReturnType<typeof currentUser>> | null = null;
+  let userId: string | null = null;
+  let orders: Awaited<ReturnType<typeof getMyOrders>> | null = null;
+
+  // 1) Safely resolve Clerk auth & user
+  try {
+    const authResult = await auth();
+    userId = authResult.userId ?? null;
+
+    if (userId) {
+      user = await currentUser();
+    }
+  } catch (error) {
+    console.error("[Header] Error while reading Clerk auth/currentUser:", error);
+    user = null;
+    userId = null;
   }
+
+  // 2) Safely load orders if we have a userId
+  if (userId) {
+    try {
+      orders = await getMyOrders(userId);
+    } catch (error) {
+      console.error("[Header] Error fetching orders from Sanity:", error);
+      orders = [];
+    }
+  }
+
+  const orderCount = orders?.length ?? 0;
 
   return (
     <header className="sticky top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
@@ -28,7 +51,9 @@ const Header = async () => {
           <MobileMenu />
           <Logo />
         </div>
+
         <HeaderMenu />
+
         <div className="w-auto md:w-1/3 flex items-center justify-end gap-5">
           <SearchBar />
           <CartIcon />
@@ -41,7 +66,7 @@ const Header = async () => {
             >
               <Logs />
               <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
-                {orders?.length ? orders?.length : 0}
+                {orderCount}
               </span>
             </Link>
           )}
