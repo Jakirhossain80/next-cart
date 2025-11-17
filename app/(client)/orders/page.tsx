@@ -14,27 +14,24 @@ import React from "react";
 const OrdersPage = async () => {
   let userId: string | null = null;
 
-  // 1) Safely read Clerk auth
+  // Safely read Clerk auth
   try {
-    const { userId: uid } = await auth();
-    userId = uid ?? null;
+    const authResult = await auth();
+    userId = authResult.userId;
   } catch (error) {
     console.error("[OrdersPage] Error reading Clerk auth:", error);
-    userId = null;
   }
 
-  // 2) If user is not logged in, redirect to local sign-in page
+  // Treat missing/failed auth as "not signed in"
   if (!userId) {
     redirect(`/sign-in?redirect_url=/orders`);
   }
 
-  // 3) Safely fetch orders
-  let orders: Awaited<ReturnType<typeof getMyOrders>> = [];
+  let orders = null;
   try {
-    const data = await getMyOrders(userId);
-    orders = data ?? [];
+    orders = await getMyOrders(userId);
   } catch (error) {
-    console.error("[OrdersPage] Error fetching orders from Sanity:", error);
+    console.error("[OrdersPage] Error fetching orders:", error);
     orders = [];
   }
 

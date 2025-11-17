@@ -105,7 +105,6 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      // If you don't have /public/icon.png, remove the next line to avoid a 404.
       { url: "/icon.png", type: "image/png" },
     ],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],

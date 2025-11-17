@@ -6,15 +6,14 @@ import React from "react";
 const WishListPage = async () => {
   let userId: string | null = null;
 
+  // Safely read Clerk auth
   try {
-    const { userId: uid } = await auth();
-    userId = uid ?? null;
+    const authResult = await auth();
+    userId = authResult.userId;
   } catch (error) {
     console.error("[WishListPage] Error reading Clerk auth:", error);
-    userId = null;
   }
 
-  // If the user is not signed in (or auth failed), redirect to /sign-in
   if (!userId) {
     redirect(`/sign-in?redirect_url=/wishlist`);
   }

@@ -18,31 +18,28 @@ const Header = async () => {
   let userId: string | null = null;
   let orders: Awaited<ReturnType<typeof getMyOrders>> | null = null;
 
-  // 1) Safely resolve Clerk auth & user
+  // Safely read Clerk user and auth
   try {
-    const authResult = await auth();
-    userId = authResult.userId ?? null;
-
-    if (userId) {
-      user = await currentUser();
-    }
+    user = await currentUser();
   } catch (error) {
-    console.error("[Header] Error while reading Clerk auth/currentUser:", error);
-    user = null;
-    userId = null;
+    console.error("[Header] Error while reading Clerk currentUser:", error);
   }
 
-  // 2) Safely load orders if we have a userId
+  try {
+    const authResult = await auth();
+    userId = authResult.userId;
+  } catch (error) {
+    console.error("[Header] Error while reading Clerk auth:", error);
+  }
+
+  // Only fetch orders if we successfully got a userId
   if (userId) {
     try {
       orders = await getMyOrders(userId);
     } catch (error) {
-      console.error("[Header] Error fetching orders from Sanity:", error);
-      orders = [];
+      console.error("[Header] Error fetching orders:", error);
     }
   }
-
-  const orderCount = orders?.length ?? 0;
 
   return (
     <header className="sticky top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
@@ -51,9 +48,7 @@ const Header = async () => {
           <MobileMenu />
           <Logo />
         </div>
-
         <HeaderMenu />
-
         <div className="w-auto md:w-1/3 flex items-center justify-end gap-5">
           <SearchBar />
           <CartIcon />
@@ -66,7 +61,7 @@ const Header = async () => {
             >
               <Logs />
               <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
-                {orderCount}
+                {orders?.length ? orders.length : 0}
               </span>
             </Link>
           )}
