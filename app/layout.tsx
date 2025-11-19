@@ -33,7 +33,7 @@ const APP_NAME = "NextCart";
 const APP_DESC =
   "NextCart is a modern, SEO-friendly e-commerce app built with Next.js, Tailwind CSS, and TypeScript.";
 
-/** Viewport */
+/** Viewport Section */
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
