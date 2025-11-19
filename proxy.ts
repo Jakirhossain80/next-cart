@@ -1,13 +1,13 @@
 // proxy.ts
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 /**
  * PUBLIC ROUTES
  * These routes do NOT require authentication.
- * Anything not in this list will require login.
  */
 const isPublicRoute = createRouteMatcher([
-  "/",                    // Home page MUST be public to avoid 401
+  "/", // Home
   "/shop(.*)",
   "/deal(.*)",
   "/blog(.*)",
@@ -15,7 +15,7 @@ const isPublicRoute = createRouteMatcher([
   "/category(.*)",
   "/product(.*)",
 
-  // Optional: Sanity Studio (make private later if needed)
+  // Sanity Studio (optional, can be made protected later)
   "/studio(.*)",
 
   // Stripe Webhook — must ALWAYS stay public
@@ -32,17 +32,23 @@ const isPublicRoute = createRouteMatcher([
   "/apple-touch-icon.png",
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, request) => {
   try {
-    // Allow all defined public routes
-    if (isPublicRoute(req)) return;
+    // Public routes: just continue the request chain
+    if (isPublicRoute(request)) {
+      return NextResponse.next();
+    }
 
-    // Everything else requires authentication
-    return auth.protect();
+    // Protected routes: require authentication
+    await auth.protect();
+
+    // If protect() passes, continue
+    return NextResponse.next();
   } catch (err) {
-    console.error("Middleware error:", err);
-    // Fail gracefully — never break the request pipeline
-    return;
+    console.error("[Middleware] error:", err);
+
+    // Fail gracefully – never crash the Web Handler
+    return NextResponse.next();
   }
 });
 
