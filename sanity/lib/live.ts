@@ -1,92 +1,58 @@
-import { client } from "./client";
+// sanity/lib/live.ts
+import "server-only";
+import { createClient } from "next-sanity";
+import {
+  apiVersion as envApiVersion,
+  dataset as envDataset,
+  projectId as envProjectId,
+} from "../env";
 
-const token = process.env.SANITY_API_READ_TOKEN;
+type SanityFetchArgs = {
+  query: string;
+  params?: Record<string, unknown>;
+};
 
-type QueryParams = Record<string, unknown> | undefined;
+// Prefer NEXT_PUBLIC_* environment variables at runtime
+const projectId =
+  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? envProjectId;
+const dataset =
+  process.env.NEXT_PUBLIC_SANITY_DATASET ?? envDataset;
+const apiVersion =
+  process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? envApiVersion ?? "2025-10-29";
 
-function FallbackSanityLive() {
-  return null;
+// Basic guard so we fail with a clear error if misconfigured
+if (!projectId || !dataset) {
+  throw new Error(
+    "sanity/lib/live.ts: Missing projectId or dataset. " +
+      "Set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET or update env.ts."
+  );
 }
 
-async function fallbackFetch<T>(query: string, params?: QueryParams) {
-  const data = await client.fetch<T>(query, params);
-  return { data };
-}
-
-// --- Lazy/dynamic live loader (runs once) ---
-type LiveHelpers = {
-  SanityLive?: React.ComponentType;
-  sanityFetch?: <T>(opts: { query: string; params?: QueryParams }) => Promise<{ data: T }>;
-} | null;
-
-let _livePromise: Promise<LiveHelpers> | null = null;
-
-// Try to dynamically import next-sanity and call defineLive at runtime.
-// Never throws; returns null if unavailable or misconfigured.
-async function loadLive(): Promise<LiveHelpers> {
-  try {
-    // Dynamic import to prevent compile-time export validation
-    const mod: any = await import("next-sanity").catch(() => null);
-    const defineLive = mod?.defineLive;
-
-    if (typeof defineLive === "function" && token) {
-      const live = defineLive({
-        client,
-        serverToken: token,
-        browserToken: token,
-        fetchOptions: { revalidate: 0 },
-      });
-
-      if (live?.SanityLive && live?.sanityFetch) {
-        return live as LiveHelpers;
-      }
-    }
-  } catch {
-    // Silently fall back
-  }
-  return null;
-}
-
-function getLiveOnce(): Promise<LiveHelpers> {
-  if (!_livePromise) _livePromise = loadLive();
-  return _livePromise;
-}
-
-// --- Exported helpers ---
-// Component export must be synchronous; we expose a mutable binding
-// that upgrades once live helpers resolve.
-let SanityLiveComp: React.ComponentType = FallbackSanityLive;
-getLiveOnce().then((live) => {
-  if (live?.SanityLive) {
-    SanityLiveComp = live.SanityLive!;
-  }
+// Plain read-only client, no fancy live/preview for now
+const client = createClient({
+  projectId,
+  dataset,
+  apiVersion,
+  useCdn: true, // cached, fast, OK for public reads
 });
 
-async function sanityFetchImpl<T>({
+// Simple helper with same signature used by your queries
+export async function sanityFetch<T = unknown>({
   query,
-  params,
-}: {
-  query: string;
-  params?: QueryParams;
-}): Promise<{ data: T }> {
-  const live = await getLiveOnce();
-  if (live?.sanityFetch) {
-    return live.sanityFetch<T>({ query, params });
+  params = {},
+}: SanityFetchArgs): Promise<{ data: T }> {
+  try {
+    const data = await client.fetch<T>(query, params);
+    return { data };
+  } catch (error) {
+    console.error("[sanityFetch] Error querying Sanity:", error);
+    throw error;
   }
-  return fallbackFetch<T>(query, params);
 }
 
-export async function sanityFetchData<T>({
-  query,
-  params,
-}: {
-  query: string;
-  params?: QueryParams;
-}): Promise<T> {
-  const result = await sanityFetchImpl<T>({ query, params });
-  return result.data;
-}
-
-// Keep your existing name/shape for current callers
-export const sanityFetch = sanityFetchImpl;
-export const SanityLive = SanityLiveComp;
+// Optional: if you ever want to re-add <SanityLive />, you can export a stub
+// for now to avoid import errors:
+//
+// export function SanityLive() {
+//   return null;
+// }
