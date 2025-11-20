@@ -5,12 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Providers from "./providers";
 
-/**
- * Because Header uses Clerk's server helpers (auth/currentUser),
- * which internally rely on request headers, we must mark the
- * app as dynamic so Next.js doesn't try to statically prerender
- * routes like /blog, /cart, /orders, /wishlist, etc.
- */
+
 export const dynamic = "force-dynamic";
 
 /** Fonts (use variable to avoid invalid ranges) */
