@@ -2,7 +2,9 @@
 import { NextStudio } from "next-sanity/studio";
 import config from "../../../sanity.config";
 
-export const dynamic = "force-static";
+// Make Studio always dynamic (no static generation / no ISR)
+export const dynamic = "force-dynamic";
+export const revalidate = 0; // optional but explicit
 export const runtime = "nodejs";
 
 export { metadata, viewport } from "next-sanity/studio";
