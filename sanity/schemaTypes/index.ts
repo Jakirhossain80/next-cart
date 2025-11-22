@@ -3,7 +3,7 @@ import { categoryType } from "./categoryType";
 import { blockContentType } from "./blockContentType";
 import { productType } from "./productType";
 import { orderType } from "./orderType";
-import { brandType } from "./brandType"; // ✅ fixed: singular
+import { brandType } from "./brandType";
 import { blogType } from "./blogType";
 import { blogCategoryType } from "./blogCategoryType";
 import { authorType } from "./authorType";
