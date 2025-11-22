@@ -4,7 +4,7 @@ import config from "../../../sanity.config";
 
 // Make Studio always dynamic (no static generation / no ISR)
 export const dynamic = "force-dynamic";
-export const revalidate = 0; // optional but explicit
+export const revalidate = 0;
 export const runtime = "nodejs";
 
 export { metadata, viewport } from "next-sanity/studio";
