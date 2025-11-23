@@ -11,7 +11,7 @@ const projectId =
 const dataset =
   process.env.NEXT_PUBLIC_SANITY_DATASET ?? envDataset;
 const apiVersion =
-  process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? envApiVersion ?? "2025-10-29";
+  process.env.NEXT_PUBLIC_SANITY_API_VERSION ?? envApiVersion ?? "2023-10-16";
 
 const writeToken = process.env.SANITY_API_WRITE_TOKEN;
 
