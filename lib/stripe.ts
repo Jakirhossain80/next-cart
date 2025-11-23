@@ -1,6 +1,4 @@
 // lib/stripe.ts
-"use server";
-
 import Stripe from "stripe";
 
 // Trim in case of accidental spaces in env var
