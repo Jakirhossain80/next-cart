@@ -6,6 +6,7 @@ import { backendClient } from "@/sanity/lib/backendClient";
 export async function POST(req: Request) {
   try {
     const { userId } = auth();
+
     if (!userId) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -23,10 +24,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // If user wants this as default, you could unset previous defaults here (optional)
+    // If user wants this as default, unset previous defaults for this user (optional but useful)
     if (makeDefault) {
       await backendClient
-        .patch({ query: `*[_type == "address" && clerkUserId == $userId && default == true]`, params: { userId } })
+        .patch({
+          query:
+            '*[_type == "address" && clerkUserId == $userId && default == true]',
+          params: { userId },
+        })
         .set({ default: false })
         .commit({ autoGenerateArrayKeys: true })
         .catch(() => {});
