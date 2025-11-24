@@ -7,6 +7,15 @@ export const addressType = defineType({
   type: "document",
   icon: HomeIcon,
   fields: [
+    // NEW: Tie each address to a specific Clerk user
+    defineField({
+      name: "clerkUserId",
+      title: "Clerk User ID",
+      type: "string",
+      description: "The Clerk user this address belongs to",
+      validation: (Rule) => Rule.required(),
+    }),
+
     defineField({
       name: "name",
       title: "Address Name",
@@ -67,12 +76,12 @@ export const addressType = defineType({
       description: "Is this the default shipping address?",
       initialValue: false,
     }),
-
     defineField({
       name: "createdAt",
       title: "Created At",
       type: "datetime",
       initialValue: () => new Date().toISOString(),
+      readOnly: true,
     }),
   ],
   preview: {

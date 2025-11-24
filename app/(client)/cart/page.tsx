@@ -41,7 +41,7 @@ const CartPage = () => {
     getSubTotalPrice,
     resetCart,
   } = useStore();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // checkout loading
   const groupedItems = useStore((state) => state.getGroupedItems());
 
   const { isSignedIn, isLoaded } = useAuth();
@@ -50,6 +50,19 @@ const CartPage = () => {
 
   const [addresses, setAddresses] = useState<Address[] | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    name: user?.fullName ?? "",
+    email: user?.emailAddresses[0]?.emailAddress ?? "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
+    makeDefault: true,
+  });
 
   // Redirect unauthenticated users to local /sign-in (prevents Clerk CORS issues)
   useEffect(() => {
@@ -59,12 +72,17 @@ const CartPage = () => {
   }, [isLoaded, isSignedIn, router]);
 
   const fetchAddresses = async () => {
-    setLoading(true);
+    if (!user?.id) return;
+
+    setAddressesLoading(true);
     try {
-      const query = `*[_type=="address"] | order(createdAt desc)`;
-      const data = await client.fetch(query);
+      // Only fetch addresses for the current Clerk user
+      const query =
+        '*[_type == "address" && clerkUserId == $userId] | order(createdAt desc)';
+      const data: Address[] = await client.fetch(query, { userId: user.id });
+
       setAddresses(data);
-      const defaultAddress = data.find((addr: Address) => addr.default);
+      const defaultAddress = data.find((addr) => addr.default);
       if (defaultAddress) {
         setSelectedAddress(defaultAddress);
       } else if (data.length > 0) {
@@ -74,13 +92,17 @@ const CartPage = () => {
     } catch (error) {
       console.log("Addresses fetching error:", error);
     } finally {
-      setLoading(false);
+      setAddressesLoading(false);
     }
   };
 
+  // Fetch addresses once auth + user are ready
   useEffect(() => {
-    fetchAddresses();
-  }, []);
+    if (isLoaded && isSignedIn && user?.id) {
+      fetchAddresses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, isSignedIn, user]);
 
   const handleResetCart = () => {
     const confirmed = window.confirm(
@@ -223,8 +245,10 @@ const CartPage = () => {
                   </Button>
                 </div>
               </div>
+
               <div>
                 <div className="lg:col-span-1">
+                  {/* Desktop order summary */}
                   <div className="hidden md:inline-block w-full bg-white p-6 rounded-lg border">
                     <h2 className="text-xl font-semibold mb-4">
                       Order Summary
@@ -258,6 +282,8 @@ const CartPage = () => {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Delivery addresses */}
                   {addresses && (
                     <div className="bg-white rounded-md mt-5">
                       <Card>
@@ -297,15 +323,162 @@ const CartPage = () => {
                               </div>
                             ))}
                           </RadioGroup>
-                          <Button variant="outline" className="w-full mt-4">
+
+                          <Button
+                            variant="outline"
+                            className="w-full mt-4"
+                            onClick={() => setIsAddressDialogOpen(true)}
+                          >
                             Add New Address
                           </Button>
+
+                          {/* Inline "dialog" for adding a new address */}
+                          {isAddressDialogOpen && (
+                            <div className="mt-4 border rounded-md p-4 bg-gray-50 space-y-3">
+                              <h3 className="font-semibold text-sm md:text-base">
+                                Add New Delivery Address
+                              </h3>
+                              <div className="grid gap-3">
+                                <input
+                                  className="border rounded px-2 py-1 text-sm"
+                                  placeholder="Full Name"
+                                  value={addressForm.name}
+                                  onChange={(e) =>
+                                    setAddressForm((prev) => ({
+                                      ...prev,
+                                      name: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <input
+                                  className="border rounded px-2 py-1 text-sm"
+                                  placeholder="Email"
+                                  type="email"
+                                  value={addressForm.email}
+                                  onChange={(e) =>
+                                    setAddressForm((prev) => ({
+                                      ...prev,
+                                      email: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <input
+                                  className="border rounded px-2 py-1 text-sm"
+                                  placeholder="Street Address"
+                                  value={addressForm.address}
+                                  onChange={(e) =>
+                                    setAddressForm((prev) => ({
+                                      ...prev,
+                                      address: e.target.value,
+                                    }))
+                                  }
+                                />
+                                <div className="grid grid-cols-3 gap-2">
+                                  <input
+                                    className="border rounded px-2 py-1 text-sm"
+                                    placeholder="City"
+                                    value={addressForm.city}
+                                    onChange={(e) =>
+                                      setAddressForm((prev) => ({
+                                        ...prev,
+                                        city: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                  <input
+                                    className="border rounded px-2 py-1 text-sm"
+                                    placeholder="State"
+                                    value={addressForm.state}
+                                    onChange={(e) =>
+                                      setAddressForm((prev) => ({
+                                        ...prev,
+                                        state: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                  <input
+                                    className="border rounded px-2 py-1 text-sm"
+                                    placeholder="ZIP"
+                                    value={addressForm.zip}
+                                    onChange={(e) =>
+                                      setAddressForm((prev) => ({
+                                        ...prev,
+                                        zip: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end gap-2 pt-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  type="button"
+                                  onClick={() =>
+                                    setIsAddressDialogOpen(false)
+                                  }
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  type="button"
+                                  disabled={savingAddress}
+                                  onClick={async () => {
+                                    try {
+                                      setSavingAddress(true);
+                                      const res = await fetch("/api/addresses", {
+                                        method: "POST",
+                                        headers: {
+                                          "Content-Type":
+                                            "application/json",
+                                        },
+                                        body: JSON.stringify(addressForm),
+                                      });
+
+                                      if (!res.ok) {
+                                        throw new Error(
+                                          "Failed to save address"
+                                        );
+                                      }
+
+                                      const newAddress: Address =
+                                        await res.json();
+                                      toast.success(
+                                        "Address added successfully!"
+                                      );
+
+                                      // Update local state without full refetch
+                                      setAddresses((prev) =>
+                                        prev
+                                          ? [newAddress, ...prev]
+                                          : [newAddress]
+                                      );
+                                      setSelectedAddress(newAddress);
+                                      setIsAddressDialogOpen(false);
+                                    } catch (err) {
+                                      console.error(err);
+                                      toast.error(
+                                        "Could not save address"
+                                      );
+                                    } finally {
+                                      setSavingAddress(false);
+                                    }
+                                  }}
+                                >
+                                  {savingAddress ? "Saving..." : "Save Address"}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     </div>
                   )}
                 </div>
               </div>
+
               {/* Order summary for mobile view */}
               <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
                 <div className="bg-white p-4 rounded-lg border mx-4">
