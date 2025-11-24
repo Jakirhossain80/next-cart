@@ -435,6 +435,7 @@ const CartPage = () => {
                                             "application/json",
                                         },
                                         body: JSON.stringify(addressForm),
+                                         credentials: "include",
                                       });
 
                                       if (!res.ok) {
