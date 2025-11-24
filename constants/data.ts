@@ -11,6 +11,7 @@ export const quickLinksData = [
   { title: "Terms & Conditions", href: "/terms" },
   { title: "Privacy Policy", href: "/privacy" },
   { title: "FAQs", href: "/faqs" },
+  { title: "Help", href: "/help" },
  
 ];
 export const categoriesData = [
