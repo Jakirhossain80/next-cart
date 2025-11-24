@@ -1,4 +1,4 @@
-// app/api/addresses/route.ts
+// app/api/address/route.ts
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { backendClient } from "@/sanity/lib/backendClient";

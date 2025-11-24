@@ -428,7 +428,7 @@ const CartPage = () => {
                                   onClick={async () => {
                                     try {
                                       setSavingAddress(true);
-                                      const res = await fetch("/api/addresses", {
+                                      const res = await fetch("/api/address", {
                                         method: "POST",
                                         headers: {
                                           "Content-Type":
