@@ -1,3 +1,4 @@
+import React from "react";
 import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
 import { Button } from "@/components/ui/button";
@@ -9,27 +10,21 @@ import { auth } from "@clerk/nextjs/server";
 import { FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import React from "react";
 
 const OrdersPage = async () => {
-  let userId: string | null = null;
+  // Read Clerk auth on the server
+  const { userId } = auth();
 
-  // Safely read Clerk auth
-  try {
-    const authResult = await auth();
-    userId = authResult.userId;
-  } catch (error) {
-    console.error("[OrdersPage] Error reading Clerk auth:", error);
-  }
-
-  // Treat missing/failed auth as "not signed in"
+  // If not signed in, redirect to sign-in and then back to /orders
   if (!userId) {
     redirect(`/sign-in?redirect_url=/orders`);
   }
 
-  let orders = null;
+  // Fetch orders for this user; fallback to empty array if null or error
+  let orders;
   try {
-    orders = await getMyOrders(userId);
+    const result = await getMyOrders(userId);
+    orders = result ?? [];
   } catch (error) {
     console.error("[OrdersPage] Error fetching orders:", error);
     orders = [];
@@ -38,7 +33,7 @@ const OrdersPage = async () => {
   return (
     <div>
       <Container className="py-10">
-        {orders?.length ? (
+        {orders.length > 0 ? (
           <Card className="w-full">
             <CardHeader>
               <CardTitle>Order List</CardTitle>
@@ -67,6 +62,7 @@ const OrdersPage = async () => {
                     </TableRow>
                   </TableHeader>
 
+                  {/* Reuse your existing OrdersComponent to render rows */}
                   <OrdersComponent orders={orders} />
                 </Table>
                 <ScrollBar orientation="horizontal" />
