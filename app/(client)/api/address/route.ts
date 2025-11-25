@@ -6,6 +6,7 @@ import { backendClient } from "@/sanity/lib/backendClient";
 export async function POST(req: Request) {
   try {
     const { userId } = auth();
+    console.log("DEBUG /api/address userId:", userId);
 
     if (!userId) {
       return NextResponse.json(
