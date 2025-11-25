@@ -72,22 +72,48 @@ const CartPage = () => {
   }, [isLoaded, isSignedIn, router]);
 
   const fetchAddresses = async () => {
-    if (!user?.id) return;
-
     setAddressesLoading(true);
-    try {
-      // Only fetch addresses for the current Clerk user
-      const query =
-        '*[_type == "address" && clerkUserId == $userId] | order(createdAt desc)';
-      const data: Address[] = await client.fetch(query, { userId: user.id });
 
-      setAddresses(data);
-      const defaultAddress = data.find((addr) => addr.default);
-      if (defaultAddress) {
-        setSelectedAddress(defaultAddress);
-      } else if (data.length > 0) {
-        // Optional: select first address if no default
-        setSelectedAddress(data[0]);
+    try {
+      // 1) If user exists, try to load user-specific addresses
+      let userAddresses: Address[] = [];
+
+      if (user?.id) {
+        const userQuery =
+          '*[_type == "address" && clerkUserId == $userId] | order(createdAt desc)';
+        userAddresses = await client.fetch(userQuery, { userId: user.id });
+      }
+
+      if (userAddresses.length > 0) {
+        // ✅ Found addresses for this user
+        setAddresses(userAddresses);
+
+        const defaultAddress = userAddresses.find((addr) => addr.default);
+        if (defaultAddress) {
+          setSelectedAddress(defaultAddress);
+        } else {
+          setSelectedAddress(userAddresses[0]);
+        }
+
+        return;
+      }
+
+      // 2) Fallback: no user-specific addresses → use global default
+      const globalDefaultQuery =
+        '*[_type == "address" && default == true && !defined(clerkUserId)][0]';
+
+      const globalDefault: Address | null = await client.fetch(
+        globalDefaultQuery
+      );
+
+      if (globalDefault) {
+        // Wrap in array so the UI can still map over addresses
+        setAddresses([globalDefault]);
+        setSelectedAddress(globalDefault);
+      } else {
+        // No addresses at all
+        setAddresses([]);
+        setSelectedAddress(null);
       }
     } catch (error) {
       console.log("Addresses fetching error:", error);
@@ -435,7 +461,7 @@ const CartPage = () => {
                                             "application/json",
                                         },
                                         body: JSON.stringify(addressForm),
-                                         credentials: "include",
+                                        credentials: "include",
                                       });
 
                                       if (!res.ok) {
@@ -460,9 +486,7 @@ const CartPage = () => {
                                       setIsAddressDialogOpen(false);
                                     } catch (err) {
                                       console.error(err);
-                                      toast.error(
-                                        "Could not save address"
-                                      );
+                                      toast.error("Could not save address");
                                     } finally {
                                       setSavingAddress(false);
                                     }
