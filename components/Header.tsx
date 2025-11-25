@@ -8,7 +8,12 @@ import FavoriteButton from "./FavoriteButton";
 import SignIn from "./SignIn";
 import MobileMenu from "./MobileMenu";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import Link from "next/link";
 import { Logs } from "lucide-react";
 import { getMyOrders } from "@/sanity/queries";
@@ -48,7 +53,9 @@ const Header = async () => {
           <MobileMenu />
           <Logo />
         </div>
+
         <HeaderMenu />
+
         <div className="w-auto md:w-1/3 flex items-center justify-end gap-5">
           <SearchBar />
           <CartIcon />
@@ -70,7 +77,9 @@ const Header = async () => {
             <SignedIn>
               <UserButton />
             </SignedIn>
-            {!user && <SignIn />}
+            <SignedOut>
+              <SignIn />
+            </SignedOut>
           </ClerkLoaded>
         </div>
       </Container>
