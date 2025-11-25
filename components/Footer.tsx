@@ -14,11 +14,13 @@ import { getCategories } from "@/sanity/queries";
 const Footer = async () => {
   // Fetch categories dynamically from Sanity
   const categories =
-    ((await getCategories()) as { title?: string; slug?: { current?: string } }[]) ||
-    [];
+    ((await getCategories()) as {
+      title?: string;
+      slug?: { current?: string };
+    }[]) || [];
 
   // Optionally limit how many categories show in the footer
-  const footerCategories = categories.slice(0, 9); // enough for your list
+  const footerCategories = categories.slice(0, 9);
 
   return (
     <footer className="bg-white border-t">
@@ -57,7 +59,7 @@ const Footer = async () => {
             </ul>
           </div>
 
-          {/* Dynamic categories from Sanity */}
+          {/* Dynamic categories — links match CategoryList/Shop filter */}
           <div>
             <SubTitle>Categories</SubTitle>
             <ul className="space-y-3 mt-4">
@@ -70,7 +72,8 @@ const Footer = async () => {
                 return (
                   <li key={slug}>
                     <Link
-                      href={`/category/${encodeURIComponent(slug)}`}
+                      // This matches how Shop reads ?category= from URL
+                      href={`/shop?category=${encodeURIComponent(slug)}`}
                       className="hover:text-shop_light_green hoverEffect font-medium"
                     >
                       {title}
