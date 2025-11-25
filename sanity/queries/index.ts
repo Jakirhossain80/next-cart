@@ -6,7 +6,6 @@ import {
   DEAL_PRODUCTS,
   GET_ALL_BLOG,
   LATEST_BLOG_QUERY,
-  MY_ORDERS_QUERY,
   OTHERS_BLOG_QUERY,
   PRODUCT_BY_SLUG_QUERY,
   SINGLE_BLOG_QUERY,
@@ -53,6 +52,7 @@ const getLatestBlogs = async () => {
     return [];
   }
 };
+
 const getDealProducts = async () => {
   try {
     const { data } = await sanityFetch({ query: DEAL_PRODUCTS });
@@ -62,6 +62,7 @@ const getDealProducts = async () => {
     return [];
   }
 };
+
 const getProductBySlug = async (slug: string) => {
   try {
     const product = await sanityFetch({
@@ -76,6 +77,7 @@ const getProductBySlug = async (slug: string) => {
     return null;
   }
 };
+
 const getBrand = async (slug: string) => {
   try {
     const product = await sanityFetch({
@@ -90,18 +92,54 @@ const getBrand = async (slug: string) => {
     return null;
   }
 };
+
+/**
+ * Get orders for a specific Clerk user.
+ * This version filters by clerkUserId and returns a clean array.
+ */
 const getMyOrders = async (userId: string) => {
+  if (!userId) return [];
+
   try {
-    const orders = await sanityFetch({
-      query: MY_ORDERS_QUERY,
+    const query = /* groq */ `
+      *[_type == "order" && clerkUserId == $userId] 
+        | order(orderDate desc) {
+          _id,
+          orderNumber,
+          orderDate,
+          customerName,
+          email,
+          status,
+          totalPrice,
+          amountDiscount,
+          currency,
+          invoice,
+          "invoiceNumber": invoice.number,
+          products[] {
+            quantity,
+            product->{
+              _id,
+              name,
+              slug,
+              images,
+              price
+            }
+          }
+        }
+    `;
+
+    const { data } = await sanityFetch({
+      query,
       params: { userId },
     });
-    return orders?.data || null;
+
+    return data ?? [];
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
-    return null;
+    console.error("Error fetching orders:", error);
+    return [];
   }
 };
+
 const getAllBlogs = async (quantity: number) => {
   try {
     const { data } = await sanityFetch({
@@ -127,6 +165,7 @@ const getSingleBlog = async (slug: string) => {
     return [];
   }
 };
+
 const getBlogCategories = async () => {
   try {
     const { data } = await sanityFetch({
@@ -151,6 +190,7 @@ const getOthersBlog = async (slug: string, quantity: number) => {
     return [];
   }
 };
+
 export {
   getCategories,
   getAllBrands,

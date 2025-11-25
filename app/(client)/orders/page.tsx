@@ -1,3 +1,4 @@
+// app/orders/page.tsx
 import React from "react";
 import Container from "@/components/Container";
 import OrdersComponent from "@/components/OrdersComponent";
@@ -12,16 +13,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 const OrdersPage = async () => {
-  // Read Clerk auth on the server
+  // 1) Get Clerk user on the server
   const { userId } = auth();
 
-  // If not signed in, redirect to sign-in and then back to /orders
+  // 2) Redirect if not signed in
   if (!userId) {
-    redirect(`/sign-in?redirect_url=/orders`);
+    redirect("/sign-in?redirect_url=/orders");
   }
 
-  // Fetch orders for this user; fallback to empty array if null or error
-  let orders;
+  // 3) Fetch orders for this user
+  let orders = [];
   try {
     const result = await getMyOrders(userId);
     orders = result ?? [];
@@ -62,7 +63,7 @@ const OrdersPage = async () => {
                     </TableRow>
                   </TableHeader>
 
-                  {/* Reuse your existing OrdersComponent to render rows */}
+                  {/* Uses your existing OrdersComponent to render rows */}
                   <OrdersComponent orders={orders} />
                 </Table>
                 <ScrollBar orientation="horizontal" />
@@ -76,8 +77,8 @@ const OrdersPage = async () => {
               No orders found
             </h2>
             <p className="mt-2 text-sm text-gray-600 text-center max-w-md">
-              It looks like you haven&apos;t placed any orders yet. Start
-              shopping to see your orders here!
+              It looks like you haven&apos;t placed any orders yet. Complete a
+              purchase to see your orders here.
             </p>
             <Button asChild className="mt-6">
               <Link href="/">Browse Products</Link>
