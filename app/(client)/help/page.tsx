@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 const quickLinks = [
   {
     title: "Track & manage your orders",
-    href: "/orders",
+    href: "/order",
     description:
       "View your recent orders, check status, and see payment details.",
     icon: Package,
@@ -142,7 +142,7 @@ export default function HelpPage() {
               </ol>
               <Button asChild variant="outline" className="mt-1">
                 <Link
-                  href="/orders"
+                  href="/order"
                   className="inline-flex items-center gap-2 text-xs md:text-sm"
                 >
                   <Package className="h-4 w-4" />

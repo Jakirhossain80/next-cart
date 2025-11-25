@@ -63,7 +63,7 @@ const Header = async () => {
 
           {user && (
             <Link
-              href={"/orders"}
+              href={"/order"}
               className="group relative hover:text-shop_light_green hoverEffect"
             >
               <Logs />
