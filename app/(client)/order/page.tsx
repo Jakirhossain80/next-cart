@@ -1,7 +1,7 @@
 // app/order/page.tsx
 import React from "react";
 import Container from "@/components/Container";
-import OrdersComponent from "@/components/orderComponent";
+import OrdersComponent from "@/components/OrdersComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
