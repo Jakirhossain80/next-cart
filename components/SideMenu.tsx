@@ -28,7 +28,7 @@ const SideMenu: FC<SidebarProps> = ({ isOpen, onClose }) => {
           <Logo className="text-white" spanDesign="group-hover:text-white" />
           <button
             onClick={onClose}
-            className="hover:text-shop_light_green hoverEffect"
+            className="hover:text-teal-600 hoverEffect"
           >
             <X />
           </button>
@@ -39,7 +39,7 @@ const SideMenu: FC<SidebarProps> = ({ isOpen, onClose }) => {
             <Link
               href={item?.href}
               key={item?.title}
-              className={`hover:text-shop_light_green hoverEffect ${
+              className={`hover:text-teal-600 hoverEffect ${
                 pathname === item?.href && "text-white"
               }`}
             >

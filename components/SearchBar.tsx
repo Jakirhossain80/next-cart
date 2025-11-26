@@ -93,7 +93,7 @@ const SearchBar = () => {
         className="flex md:hidden"
         aria-label="Open search"
       >
-        <Search className="w-5 h-5 hover:text-shop_light_green hoverEffect" />
+        <Search className="w-5 h-5 hover:text-teal-600 hoverEffect" />
       </button>
 
       {/* Desktop: full search bar with live suggestions */}
@@ -117,7 +117,7 @@ const SearchBar = () => {
             aria-label="Search products"
             className="flex items-center justify-center"
           >
-            <Search className="w-5 h-5 hover:text-shop_light_green hoverEffect text-gray-500" />
+            <Search className="w-5 h-5 hover:text-teal-600 hoverEffect text-gray-500" />
           </button>
         </form>
 

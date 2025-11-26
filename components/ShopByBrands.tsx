@@ -65,7 +65,7 @@ const ShopByBrands = async () => {
         {extraData?.map((item, index) => (
           <div
             key={index}
-            className="flex items-center gap-3 group text-lightColor hover:text-shop_light_green"
+            className="flex items-center gap-3 group text-lightColor hover:text-teal-600"
           >
             <span className="inline-flex scale-100 group-hover:scale-90 hoverEffect">
               {item?.icon}

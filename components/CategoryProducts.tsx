@@ -51,7 +51,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           <Button
             onClick={() => handleCategoryChange(item?.slug?.current as string)}
             key={item?._id}
-            className={`bg-transparent border-0 p-0  rounded-none text-darkColor shadow-none hover:bg-shop_orange hover:text-white font-semibold hoverEffect border-b last:border-b-0 transition-colors capitalize ${item?.slug?.current === currentSlug && "bg-shop_orange text-white border-shop_orange"}`}
+            className={`bg-transparent border-0 p-0  rounded-none text-darkColor shadow-none hover:bg-orange-500 hover:text-white font-semibold hoverEffect border-b last:border-b-0 transition-colors capitalize ${item?.slug?.current === currentSlug && "bg-shop_orange text-white border-shop_orange"}`}
           >
             <p className="w-full text-left px-2">{item?.title}</p>
           </Button>

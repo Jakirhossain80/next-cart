@@ -37,7 +37,7 @@ const Footer = async () => {
             </SubText>
             <SocialMedia
               className="text-darkColor/60"
-              iconClassName="border-darkColor/60 hover:border-shop_light_green hover:text-shop_light_green"
+              iconClassName="border-darkColor/60 hover:border-shop_light_green hover:text-teal-600"
               tooltipClassName="bg-darkColor text-white"
             />
           </div>
@@ -50,7 +50,7 @@ const Footer = async () => {
                 <li key={item?.title}>
                   <Link
                     href={item?.href}
-                    className="hover:text-shop_light_green hoverEffect font-medium"
+                    className="hover:text-teal-600 hoverEffect font-medium"
                   >
                     {item?.title}
                   </Link>
@@ -74,7 +74,7 @@ const Footer = async () => {
                     <Link
                       // This matches how Shop reads ?category= from URL
                       href={`/shop?category=${encodeURIComponent(slug)}`}
-                      className="hover:text-shop_light_green hoverEffect font-medium"
+                      className="hover:text-teal-600 hoverEffect font-medium"
                     >
                       {title}
                     </Link>

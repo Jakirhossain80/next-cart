@@ -64,10 +64,10 @@ const Header = async () => {
           {user && (
             <Link
               href={"/order"}
-              className="group relative hover:text-shop_light_green hoverEffect"
+              className="group relative hover:text-teal-600 hoverEffect"
             >
               <Logs />
-              <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-blue-600 text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
                 {orders?.length ? orders.length : 0}
               </span>
             </Link>

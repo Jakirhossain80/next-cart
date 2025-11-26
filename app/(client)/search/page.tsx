@@ -30,7 +30,7 @@ const SearchPage = async ({ searchParams }: SearchPageProps) => {
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">
           Search results for:{" "}
-          <span className="text-shop_light_green">&quot;{q}&quot;</span>
+          <span className="text-teal-600">&quot;{q}&quot;</span>
         </h1>
         <p className="text-sm text-gray-500">
           {products.length} product{products.length !== 1 ? "s" : ""} found

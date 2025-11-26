@@ -39,7 +39,7 @@ const SingleProductPage = async ({
               <StarIcon
                 key={index}
                 size={12}
-                className="text-shop_light_green"
+                className="text-teal-600"
                 fill={"#3b9c3c"}
               />
             ))}
