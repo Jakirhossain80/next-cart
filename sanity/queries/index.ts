@@ -1,4 +1,6 @@
+// sanity/queries/index.ts
 import { sanityFetch } from "../lib/live";
+import type { Product } from "@/sanity.types";
 import {
   BLOG_CATEGORIES,
   BRAND_QUERY,
@@ -22,10 +24,12 @@ const getCategories = async (quantity?: number) => {
           ...,
           "productCount": count(*[_type == "product" && references(^._id)])
         }`;
+
     const { data } = await sanityFetch({
       query,
       params: quantity ? { quantity } : {},
     });
+
     return data;
   } catch (error) {
     console.log("Error fetching categories", error);
@@ -191,6 +195,39 @@ const getOthersBlog = async (slug: string, quantity: number) => {
   }
 };
 
+/**
+ * Search products by name, description, brand, or category title.
+ * Used by the /search route and SearchBar component.
+ */
+const searchProducts = async (searchTerm: string) => {
+  try {
+    const query = /* groq */ `
+      *[_type == "product" && defined(slug.current) && (
+        name match $q ||
+        description match $q ||
+        brand->title match $q ||
+        categories[]->title match $q
+      )] | order(name asc) {
+        ...,
+        "categories": categories[]->{_id, title, slug},
+        "brand": brand->{_id, title, slug}
+      }
+    `;
+
+    // The trailing * gives a "starts with" style fuzzy match
+    const { data } = await sanityFetch<Product[]>({
+      query,
+      params: { q: `${searchTerm}*` },
+      tags: ["product", "search"],
+    });
+
+    return data ?? [];
+  } catch (error) {
+    console.error("Error searching products:", error);
+    return [];
+  }
+};
+
 export {
   getCategories,
   getAllBrands,
@@ -203,4 +240,5 @@ export {
   getSingleBlog,
   getBlogCategories,
   getOthersBlog,
+  searchProducts,
 };
