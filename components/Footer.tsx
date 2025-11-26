@@ -19,7 +19,7 @@ const Footer = async () => {
       slug?: { current?: string };
     }[]) || [];
 
-  // Optionally limit how many categories show in the footer
+  // Limit how many categories show in the footer
   const footerCategories = categories.slice(0, 9);
 
   return (
@@ -59,7 +59,7 @@ const Footer = async () => {
             </ul>
           </div>
 
-          {/* Dynamic categories — links match CategoryList/Shop filter */}
+          {/* Dynamic categories — links match Shop filter (?category=) */}
           <div>
             <SubTitle>Categories</SubTitle>
             <ul className="space-y-3 mt-4">
@@ -72,7 +72,6 @@ const Footer = async () => {
                 return (
                   <li key={slug}>
                     <Link
-                      // This matches how Shop reads ?category= from URL
                       href={`/shop?category=${encodeURIComponent(slug)}`}
                       className="hover:text-teal-600 hoverEffect font-medium"
                     >
