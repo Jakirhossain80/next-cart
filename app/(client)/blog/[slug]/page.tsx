@@ -16,7 +16,6 @@ import { PortableText } from "next-sanity";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import type { Blogcategory } from "@/sanity.types";
 import React from "react";
 
 interface RouteParams {
@@ -39,8 +38,8 @@ const SingleBlogPage = async ({ params }: { params: RouteParams }) => {
               src={urlFor(blog?.mainImage).url()}
               alt={blog.title || "Blog Image"}
               width={800}
-              height={800}
-              className="w-full max-h-[800px] object-cover rounded-lg"
+              height={220}
+              className="w-full h-[220px] object-cover rounded-lg"
             />
           )}
 
@@ -49,9 +48,9 @@ const SingleBlogPage = async ({ params }: { params: RouteParams }) => {
               {/* Categories */}
               <div className="flex items-center relative group cursor-pointer">
                 {blog?.blogcategories?.map(
-                  (item: Blogcategory | null, index: number) => (
+                  (item: { title: string }, index: number) => (
                     <p
-                      key={item?._id ?? index}
+                      key={index}
                       className="font-semibold text-shop_dark_green tracking-wider"
                     >
                       {item?.title}
