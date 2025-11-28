@@ -1,6 +1,9 @@
 import Container from "@/components/Container";
 import Title from "@/components/Title";
-import { SINGLE_BLOG_QUERYResult } from "@/sanity.types";
+import {
+  SINGLE_BLOG_QUERYResult,
+  OTHERS_BLOG_QUERYResult,
+} from "@/sanity.types";
 import { urlFor } from "@/sanity/lib/image";
 import {
   getBlogCategories,
@@ -13,37 +16,42 @@ import { PortableText } from "next-sanity";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Blogcategory } from "@/sanity.types";
 import React from "react";
 
-const SingleBlogPage = async ({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) => {
-  const { slug } = await params;
+interface RouteParams {
+  slug: string;
+}
+
+const SingleBlogPage = async ({ params }: { params: RouteParams }) => {
+  const { slug } = params;
+
   const blog: SINGLE_BLOG_QUERYResult = await getSingleBlog(slug);
   if (!blog) return notFound();
 
   return (
     <div className="py-10">
       <Container className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        <div className="md:col-span-3">
+        {/* Main content */}
+        <div className="lg:col-span-3">
           {blog?.mainImage && (
             <Image
               src={urlFor(blog?.mainImage).url()}
               alt={blog.title || "Blog Image"}
               width={800}
-              height={220}
-              className="w-full max-h-[200px] object-cover rounded-lg"
+              height={800}
+              className="w-full max-h-[800px] object-cover rounded-lg"
             />
           )}
+
           <div>
             <div className="text-xs flex items-center gap-5 my-7">
+              {/* Categories */}
               <div className="flex items-center relative group cursor-pointer">
                 {blog?.blogcategories?.map(
-                  (item: { title: string }, index: number) => (
+                  (item: Blogcategory | null, index: number) => (
                     <p
-                      key={index}
+                      key={item?._id ?? index}
                       className="font-semibold text-shop_dark_green tracking-wider"
                     >
                       {item?.title}
@@ -52,17 +60,23 @@ const SingleBlogPage = async ({
                 )}
                 <span className="absolute left-0 -bottom-1.5 bg-lightColor/30 inline-block w-full h-[2px] group-hover:bg-shop_dark_green hover:cursor-pointer hoverEffect" />
               </div>
+
+              {/* Author */}
               <p className="flex items-center gap-1 text-lightColor relative group hover:cursor-pointer hover:text-shop_dark_green hoverEffect">
                 <Pencil size={15} /> {blog?.author?.name}
                 <span className="absolute left-0 -bottom-1.5 bg-lightColor/30 inline-block w-full h-[2px] group-hover:bg-shop_dark_green hoverEffect" />
               </p>
+
+              {/* Date */}
               <p className="flex items-center gap-1 text-lightColor relative group hover:cursor-pointer hover:text-shop_dark_green hoverEffect">
                 <Calendar size={15} />{" "}
                 {dayjs(blog.publishedAt).format("MMMM D, YYYY")}
                 <span className="absolute left-0 -bottom-1.5 bg-lightColor/30 inline-block w-full h-[2px] group-hover:bg-shop_dark_green hoverEffect" />
               </p>
             </div>
+
             <h2 className="text-2xl font-bold my-5">{blog?.title}</h2>
+
             <div className="flex flex-col">
               <div className="text-lightColor">
                 <div>
@@ -172,6 +186,7 @@ const SingleBlogPage = async ({
                       }}
                     />
                   )}
+
                   <div className="mt-10">
                     <Link href="/blog" className="flex items-center gap-1">
                       <ChevronLeftIcon className="size-5" />
@@ -185,6 +200,8 @@ const SingleBlogPage = async ({
             </div>
           </div>
         </div>
+
+        {/* Sidebar */}
         <BlogLeft slug={slug} />
       </Container>
     </div>
@@ -193,7 +210,7 @@ const SingleBlogPage = async ({
 
 const BlogLeft = async ({ slug }: { slug: string }) => {
   const categories = await getBlogCategories();
-  const blogs = await getOthersBlog(slug, 5);
+  const blogs: OTHERS_BLOG_QUERYResult = await getOthersBlog(slug, 5);
 
   return (
     <div>
@@ -211,10 +228,11 @@ const BlogLeft = async ({ slug }: { slug: string }) => {
           ))}
         </div>
       </div>
+
       <div className="border border-lightColor p-5 rounded-md mt-10">
         <Title className="text-base">Latest Blogs</Title>
         <div className="space-y-4 mt-4">
-          {blogs?.map((blog: Blog, index: number) => (
+          {blogs?.map((blog, index: number) => (
             <Link
               href={`/blog/${blog?.slug?.current}`}
               key={index}
