@@ -33,8 +33,8 @@ const SingleBlogPage = async ({
               src={urlFor(blog?.mainImage).url()}
               alt={blog.title || "Blog Image"}
               width={800}
-              height={800}
-              className="w-full max-h-[500px] object-cover rounded-lg"
+              height={220}
+              className="w-full max-h-[200px] object-cover rounded-lg"
             />
           )}
           <div>
