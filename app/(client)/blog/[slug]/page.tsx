@@ -10,7 +10,7 @@ import {
 import dayjs from "dayjs";
 import { Calendar, ChevronLeftIcon, Pencil } from "lucide-react";
 import { PortableText } from "next-sanity";
-import Image from "next/image";
+import Image from "next/";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import React from "react";

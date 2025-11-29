@@ -19,10 +19,10 @@ const ProductCard = ({ product }: { product: Product }) => {
             <Image
               src={urlFor(product.images[0]).url()}
               alt="productImage"
-              width={500}
-              height={500}
+              width={190}
+              height={160}
               priority
-              className={`w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg duration-500 
+              className={`w-full h-64 p-4 object-contain overflow-hidden transition-transform bg-shop_light_bg duration-500 
               ${product?.stock !== 0 ? "group-hover:scale-105" : "opacity-50"}`}
             />
           </Link>
