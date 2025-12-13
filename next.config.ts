@@ -5,7 +5,6 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
   images: {
-    // Allow Sanity CDN (narrowed to images path)
     remotePatterns: [
       {
         protocol: "https",
@@ -13,7 +12,6 @@ const nextConfig: NextConfig = {
         pathname: "/images/**",
       },
     ],
-    // Disable optimizer in dev to avoid upstream timeouts while developing
     unoptimized: isDev,
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60,
@@ -21,6 +19,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // ❌ no `turbopack` key here
 };
 
 export default nextConfig;
